@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Light Scheduler</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #74ebd5, #acb6e5);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            text-align: center;
+            width: 300px;
+        }
+        h1 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #333;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 14px;
+            color: #555;
+        }
+        input[type="time"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px;
+            width: 100%;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #status {
+            margin-top: 15px;
+            font-size: 14px;
+            color: green;
+        }
+        #introText {
+            font-size: 20px;
+            color: #4CAF50;
+            font-weight: bold;
+            margin-bottom: 20px;
+            height: 25px;
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 4px solid #4CAF50;
+            animation: typing 4s steps(30) 1s forwards, blink 0.75s step-end infinite;
+        }
+        #introText span {
+            color: #f39c12;
+        }
+        @keyframes typing {
+            from {
+                width: 0;
+            }
+            to {
+                width: 100%;
+            }
+        }
+        @keyframes blink {
+            50% {
+                border-color: transparent;
+            }
+        }
+        #introText2 {
+            font-size: 18px;
+            font-weight: normal;
+            color: #555;
+            opacity: 0;
+            animation: fadeIn 2s forwards 6s;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="introText"></div>
+    <div id="introText2">Developed by <strong>IRASUBIZA SALY NELSON</strong>, Year 2C</div>
+    
+    <h1>Light Scheduler</h1>
+    <form id="scheduleForm">
+        <label for="onTime">ON Time:</label>
+        <input type="time" id="onTime" required>
+
+        <label for="offTime">OFF Time:</label>
+        <input type="time" id="offTime" required>
+
+        <button type="submit">Set Schedule</button>
+    </form>
+    <div id="status"></div>
+</div>
+
+<script>
+    // Typewriter Effect
+    let text = "Embedded Systems Assignment";
+    let index = 0;
+    let introText = document.getElementById("introText");
+
+    function typeWriter() {
+        if (index < text.length) {
+            introText.innerHTML += text.charAt(index);
+            index++;
+            setTimeout(typeWriter, 150); // typing speed
+        }
+    }
+    typeWriter();
+
+    // WebSocket connection
+    const ws = new WebSocket("ws://localhost:8765");
+
+    ws.onopen = () => {
+        console.log("Connected to WebSocket server");
+    };
+
+    ws.onerror = (error) => {
+        console.error("WebSocket Error:", error);
+    };
+
+    ws.onmessage = (event) => {
+        document.getElementById('status').innerText = event.data;
+    };
+
+    document.getElementById('scheduleForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const onTime = document.getElementById('onTime').value;
+        const offTime = document.getElementById('offTime').value;
+
+        if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({
+                on: onTime,
+                off: offTime
+            }));
+        } else {
+            alert("WebSocket is not connected.");
+        }
+    });
+</script>
+
+</body>
+</html>
